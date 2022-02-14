@@ -8,9 +8,9 @@ namespace UnityEngine.UI
     [DisallowMultipleComponent]
     public class LoopVerticalScrollRect : LoopScrollRect
     {
-        protected override float GetSize(RectTransform item)
+        protected override float GetSize(RectTransform item, bool includeSpacing)
         {
-            float size = contentSpacing;
+            float size = includeSpacing ? contentSpacing : 0;
             if (m_GridLayout != null)
             {
                 size += m_GridLayout.cellSize.y;
@@ -19,10 +19,16 @@ namespace UnityEngine.UI
             {
                 size += LayoutUtility.GetPreferredHeight(item);
             }
+            size *= m_Content.localScale.y;
             return size;
         }
 
         protected override float GetDimension(Vector2 vector)
+        {
+            return vector.y;
+        }
+        
+        protected override float GetAbsDimension(Vector2 vector)
         {
             return vector.y;
         }
@@ -37,14 +43,14 @@ namespace UnityEngine.UI
             direction = LoopScrollRectDirection.Vertical;
             base.Awake();
 
-            GridLayoutGroup layout = content.GetComponent<GridLayoutGroup>();
+            GridLayoutGroup layout = m_Content.GetComponent<GridLayoutGroup>();
             if (layout != null && layout.constraint != GridLayoutGroup.Constraint.FixedColumnCount)
             {
                 Debug.LogError("[LoopHorizontalScrollRect] unsupported GridLayoutGroup constraint");
             }
         }
 
-        protected override bool UpdateItems(Bounds viewBounds, Bounds contentBounds)
+        protected override bool UpdateItems(ref Bounds viewBounds, ref Bounds contentBounds)
         {
             bool changed = false;
 
@@ -74,7 +80,7 @@ namespace UnityEngine.UI
                 itemTypeEnd = itemTypeStart;
 
                 float offset = offsetCount * (elementSize + contentSpacing);
-                content.anchoredPosition -= new Vector2(0, offset + (reverseDirection ? 0 : currentSize));
+                m_Content.anchoredPosition -= new Vector2(0, offset + (reverseDirection ? 0 : currentSize));
                 contentBounds.center -= new Vector3(0, offset + currentSize / 2, 0);
                 contentBounds.size = Vector3.zero;
 
@@ -101,7 +107,7 @@ namespace UnityEngine.UI
                 itemTypeEnd = itemTypeStart;
 
                 float offset = offsetCount * (elementSize + contentSpacing);
-                content.anchoredPosition += new Vector2(0, offset + (reverseDirection ? currentSize : 0));
+                m_Content.anchoredPosition += new Vector2(0, offset + (reverseDirection ? currentSize : 0));
                 contentBounds.center += new Vector3(0, offset + currentSize / 2, 0);
                 contentBounds.size = Vector3.zero;
 

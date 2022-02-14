@@ -5,8 +5,8 @@ namespace UnityEngine.UI
 {
     public interface LoopScrollPrefabSource
     {
-        public GameObject GetObject();
+        GameObject GetObject(int index);
 
-        public void ReturnObject(Transform trans);
+        void ReturnObject(Transform trans);
     }
 }
